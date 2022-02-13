@@ -1,24 +1,78 @@
-import 'package:flutter/material.dart';
+//import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:provider/provider.dart';
+import 'package:planetwork_app/screens/InputScreen.dart';
+import 'package:planetwork_app/screens/OutputScreen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => GlobalState(),
+      child: MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
+  State<MyApp> createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+  int index = 0;
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PlaNetWork',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Welcome to PlaNetWork'),
+    return FluentApp(
+      home: NavigationView(
+        appBar: NavigationAppBar(
+            automaticallyImplyLeading: false,
+            title:
+                Text("PlaNetWork, where you work your plan for the network")),
+        content: NavigationBody(
+          index: index,
+          children: [InputScreen(), OutputScreen()],
         ),
-        body: const Center(
-          child: Text('Hello World'),
+        pane: NavigationPane(
+          displayMode: PaneDisplayMode.auto,
+          selected: index,
+          onChanged: (newIndex) {
+            setState(() {
+              index = newIndex;
+            });
+          },
+          items: [
+            PaneItem(icon: Icon(FluentIcons.code), title: Text("Input Page")),
+            PaneItem(
+                icon: Icon(FluentIcons.desktop_flow),
+                title: Text("Output Page"))
+          ],
         ),
       ),
+      theme: ThemeData(
+          scaffoldBackgroundColor: Colors.white,
+          accentColor: Colors.blue,
+          iconTheme: const IconThemeData(size: 24)),
     );
+  }
+}
+
+class GlobalState with ChangeNotifier {
+  bool isLoggedIn = false;
+
+  void logOut() {
+    isLoggedIn = false;
+    notifyListeners();
+  }
+
+  void logIn() {
+    isLoggedIn = true;
+    notifyListeners();
+  }
+
+  void toggleLogIn() {
+    isLoggedIn = !isLoggedIn;
+    notifyListeners();
   }
 }

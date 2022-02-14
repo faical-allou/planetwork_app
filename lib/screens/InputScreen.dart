@@ -1,24 +1,32 @@
+//import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:planetwork_app/screens/Templates.dart';
 
 class InputScreen extends StatefulWidget {
-  State createState() => new InputScreenState();
+  @override
+  State<StatefulWidget> createState() {
+    return InputScreenState();
+  }
 }
 
 class InputScreenState extends State<InputScreen> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldPage(
-      header: Text(
-        "Input",
-        style: TextStyle(fontSize: 60),
-      ),
-      content: Center(
-        child: TextBox(
-          controller: TextEditingController(),
-          header: 'Name your analysis',
-          placeholder: 'analysis name',
-        ),
-      ),
-    );
+        header: Text("Select File and Upload"),
+        content: Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(40),
+            child: Column(
+              children: [
+                UploadField(),
+                UploadField(),
+                UploadField(),
+                UploadField(),
+                UploadField(),
+                UploadField(),
+              ],
+            )));
   }
 }

@@ -60,6 +60,7 @@ class MyAppState extends State<MyApp> {
 
 class GlobalState with ChangeNotifier {
   bool isLoggedIn = false;
+  String analysisName = '';
 
   void logOut() {
     isLoggedIn = false;
@@ -73,6 +74,11 @@ class GlobalState with ChangeNotifier {
 
   void toggleLogIn() {
     isLoggedIn = !isLoggedIn;
+    notifyListeners();
+  }
+
+  void setAnalysisName(name) {
+    analysisName = name;
     notifyListeners();
   }
 }

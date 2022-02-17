@@ -14,6 +14,7 @@ class InputScreen extends StatefulWidget {
 
 class InputScreenState extends State<InputScreen> {
   final myController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -29,23 +30,52 @@ class InputScreenState extends State<InputScreen> {
         content: Container(
             alignment: Alignment.center,
             padding: EdgeInsets.all(40),
-            child: Column(
+            child: ListView(
               children: [
                 TextBox(
                   controller: myController,
                   onChanged: (text) {
                     gs.setAnalysisName(text);
-                    myController.selection = TextSelection.collapsed(offset: 3);
                   },
                   header: 'Name your Analysis here',
                   //placeholder: status.analysisName,
                 ),
-                UploadField(),
-                UploadField(),
-                UploadField(),
-                UploadField(),
-                UploadField(),
-                UploadField(),
+                UploadField(
+                  filetype: 'sked',
+                  humanName: 'Your Schedule',
+                ),
+                UploadField(
+                  filetype: 'comp_sked',
+                  humanName: 'Competition Schedule',
+                ),
+                UploadField(
+                  filetype: 'demand',
+                  humanName: 'Demand',
+                ),
+                UploadField(
+                  filetype: 'demand_curve',
+                  humanName: 'Demand Curve',
+                ),
+                UploadField(
+                  filetype: 'preferences',
+                  humanName: 'Market Preferences',
+                ),
+                UploadField(
+                  filetype: 'connections',
+                  humanName: 'Connections',
+                ),
+                UploadField(
+                  filetype: 'route_cost',
+                  humanName: 'Route cost',
+                ),
+                UploadField(
+                  filetype: 'airport_cost',
+                  humanName: 'Airport Cost',
+                ),
+                UploadField(
+                  filetype: 'aircraft_cost',
+                  humanName: 'Aircraft Cost',
+                ),
               ],
             )));
   }

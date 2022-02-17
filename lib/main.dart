@@ -1,6 +1,8 @@
 //import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
+
 import 'package:planetwork_app/screens/InputScreen.dart';
 import 'package:planetwork_app/screens/OutputScreen.dart';
 
@@ -61,6 +63,12 @@ class MyAppState extends State<MyApp> {
 class GlobalState with ChangeNotifier {
   bool isLoggedIn = false;
   String analysisName = '';
+  Map<String, FilePickerResult?> listFiles = {};
+
+  void saveFile(String key, FilePickerResult? file) {
+    listFiles[key] = file;
+    notifyListeners();
+  }
 
   void logOut() {
     isLoggedIn = false;

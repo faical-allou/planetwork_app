@@ -14,7 +14,8 @@ class OutputScreenState extends State<OutputScreen> {
         builder: (context, status, child) {
           var status = context.read<GlobalState>();
           return Text(
-            status.analysisName,
+            //status.analysisName,
+            status.listFiles['sked']?.files.first.name ?? '',
             style: TextStyle(fontSize: 60),
           );
         },

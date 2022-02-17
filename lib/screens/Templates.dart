@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:planetwork_app/main.dart';
+import 'package:planetwork_app/io/Analysis.dart';
 
 class UploadField extends StatefulWidget {
   final String filetype;
@@ -20,9 +21,7 @@ class UploadField extends StatefulWidget {
 }
 
 class UploadFieldState extends State<UploadField> {
-  late Response response;
   late String progress = '0';
-  Dio dio = new Dio();
   FilePickerResult? selectedfile;
 
   selectFile(gs) async {
@@ -33,35 +32,6 @@ class UploadFieldState extends State<UploadField> {
     );
     gs.saveFile(widget.filetype, selectedfile);
     setState(() {}); //update the UI so that file name is shown
-  }
-
-  uploadFile(gs) async {
-    String uploadurl = "http://localhost:8080/upload/file";
-
-    FormData formdata = FormData.fromMap({
-      "file": await MultipartFile.fromBytes(
-          selectedfile?.files.first.bytes ?? [0],
-          filename: selectedfile?.files.first.name ?? ''),
-      "analysisName": gs.analysisName,
-    });
-    response = await dio.post(
-      uploadurl,
-      data: formdata,
-      onSendProgress: (int sent, int total) {
-        String percentage = (sent / total * 100).toStringAsFixed(2);
-        setState(() {
-          progress = percentage + "%";
-          //update the progress
-        });
-      },
-    );
-
-    if (response.statusCode == 200) {
-      print(response.toString());
-      //print response from server
-    } else {
-      print("Error during connection to server.");
-    }
   }
 
   Widget build(BuildContext context) {
@@ -100,7 +70,7 @@ class UploadFieldState extends State<UploadField> {
                   child: Button(
                   child: Text("UPLOAD"),
                   onPressed: () {
-                    uploadFile(gs);
+                    uploadDataFile(gs, selectedfile, widget.filetype, setState);
                   },
                 )),
         ),
@@ -127,5 +97,18 @@ class SizedBoxInput extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return SizedBox(width: 150, height: 50, child: Center(child: this.w));
+  }
+}
+
+class Waiting extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        height: 50,
+        width: 50,
+        child: ProgressRing(),
+      ),
+    );
   }
 }

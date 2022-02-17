@@ -1,9 +1,11 @@
 //import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/widgets.dart';
-import 'package:planetwork_app/screens/Templates.dart';
+import 'package:planetwork_app/io/Analysis.dart';
 import 'package:provider/provider.dart';
 import 'package:planetwork_app/main.dart';
+
+import 'package:planetwork_app/screens/Templates.dart';
 
 class InputScreen extends StatefulWidget {
   @override
@@ -76,6 +78,11 @@ class InputScreenState extends State<InputScreen> {
                   filetype: 'aircraft_cost',
                   humanName: 'Aircraft Cost',
                 ),
+                Button(
+                    child: Text('run'),
+                    onPressed: () {
+                      launchSim(gs.analysisName);
+                    }),
               ],
             )));
   }

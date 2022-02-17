@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:planetwork_app/io/analysis.dart';
 import 'package:provider/provider.dart';
 import 'package:planetwork_app/main.dart';
 
@@ -21,7 +22,12 @@ class OutputScreenState extends State<OutputScreen> {
         },
       ),
       content: Center(
-        child: Text("Welcome to output page!"),
+        child: Button(
+          child: Text("Download File"),
+          onPressed: () {
+            downloadFile("http://localhost:8080/run/");
+          },
+        ),
       ),
     );
   }

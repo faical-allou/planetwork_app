@@ -38,8 +38,8 @@ class UploadFieldState extends State<UploadField> {
     selectedfile = gs.listFiles[widget.filetype];
 
     return Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      children: <Widget>[
+      alignment: WrapAlignment.spaceAround,
+      children: [
         SizedBoxInput(Text(
           widget.humanName,
         )),
@@ -115,5 +115,34 @@ class Waiting extends StatelessWidget {
       default:
         return Container();
     }
+  }
+}
+
+class ResultElement extends StatelessWidget {
+  final String name;
+  ResultElement(this.name);
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(alignment: WrapAlignment.spaceBetween, children: [
+      Text(name),
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: SizedBox(
+          width: 150,
+          height: 50,
+          child: Center(
+            child: Button(
+              child: Text("Download Route Prof for " + name),
+              onPressed: () {
+                downloadFile("http://localhost:8080/download/" +
+                    name +
+                    "-route_prof.csv");
+              },
+            ),
+          ),
+        ),
+      )
+    ]);
   }
 }

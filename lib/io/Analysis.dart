@@ -34,10 +34,11 @@ void uploadDataFile(gs, selectedfile, filetype, setState) async {
   }
 }
 
-Future<String> launchSim(analysisName) async {
+Future<String> launchSim(analysisName, runWhenDone) async {
   String runURL = "http://localhost:8080/run/" + analysisName;
   response = await dio.get(runURL);
   if (response.statusCode == 200) {
+    runWhenDone();
     return response.toString();
   } else {
     throw Exception('Failed to launch Sim');

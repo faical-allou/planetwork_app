@@ -16,6 +16,28 @@ class InputScreen extends StatefulWidget {
 
 class InputScreenState extends State<InputScreen> {
   final myController = TextEditingController();
+  String status = 'Not Run Yet';
+
+  stopWaiting() {
+    setState(() {
+      status = 'Finished';
+      print(status);
+    });
+  }
+
+  wait() {
+    setState(() {
+      status = 'Waiting';
+      print(status);
+    });
+  }
+
+  reset() {
+    setState(() {
+      status = 'Not Run Yet';
+      print(status);
+    });
+  }
 
   @override
   void initState() {
@@ -38,6 +60,7 @@ class InputScreenState extends State<InputScreen> {
                   controller: myController,
                   onChanged: (text) {
                     gs.setAnalysisName(text);
+                    reset();
                   },
                   header: 'Name your Analysis here',
                   //placeholder: status.analysisName,
@@ -81,8 +104,21 @@ class InputScreenState extends State<InputScreen> {
                 Button(
                     child: Text('run'),
                     onPressed: () {
-                      launchSim(gs.analysisName);
+                      setState(() {
+                        status = 'Waiting';
+                      });
+                      launchSim(gs.analysisName, stopWaiting);
                     }),
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: Waiting(status),
+                    ),
+                  ),
+                ),
               ],
             )));
   }

@@ -37,7 +37,7 @@ class MyAppState extends State<MyApp> {
           children: [InputScreen(), OutputScreen()],
         ),
         pane: NavigationPane(
-          displayMode: PaneDisplayMode.auto,
+          displayMode: PaneDisplayMode.top,
           selected: index,
           onChanged: (newIndex) {
             setState(() {

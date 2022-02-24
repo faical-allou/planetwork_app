@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
-import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -101,14 +100,20 @@ class SizedBoxInput extends StatelessWidget {
 }
 
 class Waiting extends StatelessWidget {
+  final String status;
+  Waiting(this.status);
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        height: 50,
-        width: 50,
-        child: ProgressRing(),
-      ),
-    );
+    switch (status) {
+      case 'Not Run Yet':
+        return Container();
+      case 'Finished':
+        return Icon(FluentIcons.check_mark);
+      case 'Waiting':
+        return ProgressRing();
+      default:
+        return Container();
+    }
   }
 }

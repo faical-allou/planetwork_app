@@ -40,10 +40,10 @@ class UploadFieldState extends State<UploadField> {
     return Wrap(
       alignment: WrapAlignment.spaceAround,
       children: [
-        SizedBoxInput(Text(
+        SizedBoxGrid(Text(
           widget.humanName,
         )),
-        SizedBoxInput(
+        SizedBoxGrid(
           Container(
             //show file name here
             child: selectedfile == null
@@ -51,7 +51,7 @@ class UploadFieldState extends State<UploadField> {
                 : Text(selectedfile?.files.first.name ?? ''),
           ),
         ),
-        SizedBoxInput(
+        SizedBoxGrid(
           Container(
               child: Button(
             child: selectedfile == null
@@ -62,7 +62,7 @@ class UploadFieldState extends State<UploadField> {
             },
           )),
         ),
-        SizedBoxInput(
+        SizedBoxGrid(
           selectedfile == null
               ? Container()
               : Container(
@@ -73,7 +73,7 @@ class UploadFieldState extends State<UploadField> {
                   },
                 )),
         ),
-        SizedBoxInput(
+        SizedBoxGrid(
           Container(
             margin: EdgeInsets.all(10),
             //show file name here
@@ -90,9 +90,9 @@ class UploadFieldState extends State<UploadField> {
   }
 }
 
-class SizedBoxInput extends StatelessWidget {
+class SizedBoxGrid extends StatelessWidget {
   final Widget w;
-  SizedBoxInput(this.w);
+  SizedBoxGrid(this.w);
 
   Widget build(BuildContext context) {
     return SizedBox(width: 150, height: 50, child: Center(child: this.w));
@@ -124,25 +124,30 @@ class ResultElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(alignment: WrapAlignment.spaceBetween, children: [
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       Text(name),
       Padding(
         padding: EdgeInsets.all(16),
-        child: SizedBox(
-          width: 150,
-          height: 50,
-          child: Center(
-            child: Button(
-              child: Text("Download Route Prof for " + name),
-              onPressed: () {
-                downloadFile("http://localhost:8080/download/" +
-                    name +
-                    "-route_prof.csv");
-              },
-            ),
+        child: SizedBoxGrid(
+          Button(
+            child: Text("Download Route Prof for " + name),
+            onPressed: () {
+              downloadFile("http://localhost:8080/download_rp/" + name);
+            },
           ),
         ),
-      )
+      ),
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: SizedBoxGrid(
+          Button(
+            child: Text("Download All data for " + name),
+            onPressed: () {
+              downloadFile("http://localhost:8080/download/" + name + ".zip");
+            },
+          ),
+        ),
+      ),
     ]);
   }
 }

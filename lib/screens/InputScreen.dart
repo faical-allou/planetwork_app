@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:planetwork_app/io/Analysis.dart';
 import 'package:provider/provider.dart';
 import 'package:planetwork_app/main.dart';
+import 'package:planetwork_app/models/ModelData.dart';
 
 import 'package:planetwork_app/screens/Templates.dart';
 
@@ -65,42 +66,21 @@ class InputScreenState extends State<InputScreen> {
                   header: 'Name your Analysis here',
                   //placeholder: status.analysisName,
                 ),
-                UploadField(
-                  filetype: 'sked',
-                  humanName: 'Your Schedule',
-                ),
-                UploadField(
-                  filetype: 'comp_sked',
-                  humanName: 'Competition Schedule',
-                ),
-                UploadField(
-                  filetype: 'demand',
-                  humanName: 'Demand',
-                ),
-                UploadField(
-                  filetype: 'demand_curve',
-                  humanName: 'Demand Curve',
-                ),
-                UploadField(
-                  filetype: 'preferences',
-                  humanName: 'Market Preferences',
-                ),
-                UploadField(
-                  filetype: 'connections',
-                  humanName: 'Connections',
-                ),
-                UploadField(
-                  filetype: 'route_cost',
-                  humanName: 'Route cost',
-                ),
-                UploadField(
-                  filetype: 'airport_cost',
-                  humanName: 'Airport Cost',
-                ),
-                UploadField(
-                  filetype: 'aircraft_cost',
-                  humanName: 'Aircraft Cost',
-                ),
+                for (var k in listInput.keys)
+                  UploadField(
+                    filetype: k,
+                    humanName: listInput[k] ?? '',
+                  ),
+                for (var k in listParam.keys)
+                  UploadField(
+                    filetype: k,
+                    humanName: listParam[k] ?? '',
+                  ),
+                for (var k in listData.keys)
+                  UploadField(
+                    filetype: k,
+                    humanName: listData[k] ?? '',
+                  ),
                 Button(
                     child: Text('run'),
                     onPressed: () {

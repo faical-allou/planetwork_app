@@ -30,8 +30,8 @@ class MyAppState extends State<MyApp> {
       home: NavigationView(
         appBar: NavigationAppBar(
             automaticallyImplyLeading: false,
-            title:
-                Text("PlaNetWork, where you work your plan for the network")),
+            title: Text(
+                "PlaNetWork, where you work your plan for the network for the planet")),
         content: NavigationBody(
           index: index,
           children: [InputScreen(), OutputScreen()],

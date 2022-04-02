@@ -1,10 +1,10 @@
 //import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/widgets.dart';
 import 'package:planetwork_app/io/Analysis.dart';
 import 'package:provider/provider.dart';
 import 'package:planetwork_app/main.dart';
 import 'package:planetwork_app/models/ModelData.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 
 import 'package:planetwork_app/screens/Templates.dart';
 
@@ -50,6 +50,7 @@ class InputScreenState extends State<InputScreen> {
   @override
   Widget build(BuildContext context) {
     GlobalState gs = Provider.of<GlobalState>(context, listen: false);
+    late DropzoneViewController controller1;
     return ScaffoldPage(
         header: Text("Select File and Upload"),
         content: Container(
@@ -57,6 +58,27 @@ class InputScreenState extends State<InputScreen> {
             padding: EdgeInsets.all(40),
             child: ListView(
               children: [
+                SizedBox(
+                    height: 50,
+                    child: Stack(
+                      children: [
+                        DropzoneView(
+                          operation: DragOperation.copy,
+                          cursor: CursorType.grab,
+                          onCreated: (ctrl) => controller1 = ctrl,
+                          onLoaded: () => print('Zone loaded'),
+                          onError: (String? ev) => print('Error: $ev'),
+                          onHover: () => print('Zone hovered'),
+                          onDrop: (ev) async {
+                            print('Zone 1 drop: ${ev.name}');
+                            final bytes = await controller1.getFileData(ev);
+                            print(bytes.sublist(0, 20));
+                          },
+                          onLeave: () => print('Zone left'),
+                        ),
+                        Center(child: Text('Drop files here')),
+                      ],
+                    )),
                 TextBox(
                   controller: myController,
                   onChanged: (text) {

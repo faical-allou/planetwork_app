@@ -1,12 +1,15 @@
 //import 'package:flutter/material.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:planetwork_app/io/Analysis.dart';
 import 'package:provider/provider.dart';
 import 'package:planetwork_app/main.dart';
 import 'package:planetwork_app/models/ModelData.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
-
+import 'dart:typed_data';
 import 'package:planetwork_app/screens/Templates.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as Path;
 
 class InputScreen extends StatefulWidget {
   @override
@@ -50,7 +53,8 @@ class InputScreenState extends State<InputScreen> {
   @override
   Widget build(BuildContext context) {
     GlobalState gs = Provider.of<GlobalState>(context, listen: false);
-    late DropzoneViewController controller1;
+    late DropzoneViewController dropController;
+
     return ScaffoldPage(
         header: Text("Select File and Upload"),
         content: Container(
@@ -65,15 +69,11 @@ class InputScreenState extends State<InputScreen> {
                         DropzoneView(
                           operation: DragOperation.copy,
                           cursor: CursorType.grab,
-                          onCreated: (ctrl) => controller1 = ctrl,
+                          onCreated: (ctrl) => dropController = ctrl,
                           onLoaded: () => print('Zone loaded'),
                           onError: (String? ev) => print('Error: $ev'),
                           onHover: () => print('Zone hovered'),
-                          onDrop: (ev) async {
-                            print('Zone 1 drop: ${ev.name}');
-                            final bytes = await controller1.getFileData(ev);
-                            print(bytes.sublist(0, 20));
-                          },
+                          onDrop: (ev) => handleDrop(ev, dropController, gs),
                           onLeave: () => print('Zone left'),
                         ),
                         Center(child: Text('Drop files here')),
@@ -124,4 +124,100 @@ class InputScreenState extends State<InputScreen> {
               ],
             )));
   }
+}
+
+class UploadField extends StatefulWidget {
+  final String filetype;
+  final String humanName;
+
+  UploadField({Key? key, required this.filetype, required this.humanName})
+      : super(key: key);
+
+  @override
+  State<UploadField> createState() => UploadFieldState();
+}
+
+class UploadFieldState extends State<UploadField> {
+  late String progress = '0';
+  FilePickerResult? selectedfile;
+  Uint8List? selectedfilebytes;
+  String? selectedfilename;
+
+  selectFile(gs) async {
+    selectedfile = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+      //allowed extension to choose
+    );
+    selectedfilebytes = selectedfile?.files.first.bytes;
+    selectedfilename = selectedfile?.files.first.name;
+
+    gs.saveFile(widget.filetype, selectedfilebytes, selectedfilename);
+    setState(() {}); //update the UI so that file name is shown
+  }
+
+  Widget build(BuildContext context) {
+    GlobalState gs = Provider.of<GlobalState>(context, listen: false);
+    selectedfilebytes = gs.listFiles[widget.filetype];
+
+    return Wrap(
+      alignment: WrapAlignment.spaceAround,
+      children: [
+        SizedBoxGrid(Text(
+          widget.humanName,
+        )),
+        SizedBoxGrid(
+          Container(
+            //show file name here
+            child: selectedfile == null
+                ? Text("Choose File")
+                : Text(selectedfile?.files.first.name ?? ''),
+          ),
+        ),
+        SizedBoxGrid(
+          Container(
+              child: Button(
+            child: selectedfile == null
+                ? Text("CHOOSE FILE")
+                : Text("REPLACE FILE"),
+            onPressed: () {
+              selectFile(gs);
+            },
+          )),
+        ),
+        SizedBoxGrid(
+          selectedfile == null
+              ? Container()
+              : Container(
+                  child: Button(
+                  child: Text("UPLOAD"),
+                  onPressed: () {
+                    uploadDataFile(gs, selectedfilebytes, selectedfilename,
+                        widget.filetype, setState);
+                  },
+                )),
+        ),
+        SizedBoxGrid(
+          Container(
+            margin: EdgeInsets.all(10),
+            //show file name here
+            child: progress == '0'
+                ? Text("")
+                : Text(
+                    Path.basename("Progress: $progress"),
+                  ),
+            //show progress status here
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+void handleDrop(ev, controller, gs) async {
+  print('Zone 1 drop: ${ev.name}');
+  final bytes = await controller.getFileData(ev);
+  String name = await controller.getFilename(ev);
+  gs.saveFile(name, bytes, name);
+  print(gs.listFileNames);
 }

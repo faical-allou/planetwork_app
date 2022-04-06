@@ -7,6 +7,8 @@ import 'package:planetwork_app/main.dart';
 import 'package:planetwork_app/models/ModelData.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'dart:typed_data';
+import 'dart:core';
+
 import 'package:planetwork_app/screens/Templates.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as Path;
@@ -21,26 +23,66 @@ class InputScreen extends StatefulWidget {
 class InputScreenState extends State<InputScreen> {
   final myController = TextEditingController();
   String status = 'Not Run Yet';
+  String dropZoneState = '';
 
   stopWaiting() {
     setState(() {
       status = 'Finished';
-      print(status);
     });
   }
 
   wait() {
     setState(() {
       status = 'Waiting';
-      print(status);
     });
   }
 
   reset() {
     setState(() {
       status = 'Not Run Yet';
-      print(status);
     });
+  }
+
+  handleHover() {
+    setState(() {
+      dropZoneState = 'Hovering';
+      print(dropZoneState);
+    });
+  }
+
+  handleLeaveHover() {
+    setState(() {
+      dropZoneState = '';
+    });
+  }
+
+  void handleDrop(htmlFile, controller, gs, setState) async {
+    final bytes = await controller.getFileData(htmlFile);
+    String name = await controller.getFilename(htmlFile);
+    String type = detectFileType(htmlFile, controller, name);
+    gs.saveFile(type, bytes, name);
+    setState(() {
+      dropZoneState = '';
+    }); //update the UI so that file name is shown;
+  }
+
+  String detectFileType(htmlFile, controller, name) {
+    RegExp splitter = new RegExp('[.-]', caseSensitive: false);
+    var listSplit = name.split(splitter);
+    Map<String, String> fullList = listInput;
+    fullList.addAll(listParam);
+    fullList.addAll(listData);
+
+    for (var i = 0; i < listSplit.length; i++) {
+      print("Listsplit==  " + listSplit[i]);
+      for (var k in fullList.keys) {
+        print("k==  " + k);
+        if (k == listSplit[i]) {
+          return k;
+        }
+      }
+    }
+    return 'type not found';
   }
 
   @override
@@ -63,20 +105,49 @@ class InputScreenState extends State<InputScreen> {
             child: ListView(
               children: [
                 SizedBox(
-                    height: 50,
+                    height: 150,
+                    width: 600,
                     child: Stack(
                       children: [
                         DropzoneView(
                           operation: DragOperation.copy,
                           cursor: CursorType.grab,
                           onCreated: (ctrl) => dropController = ctrl,
-                          onLoaded: () => print('Zone loaded'),
                           onError: (String? ev) => print('Error: $ev'),
-                          onHover: () => print('Zone hovered'),
-                          onDrop: (ev) => handleDrop(ev, dropController, gs),
-                          onLeave: () => print('Zone left'),
+                          onHover: () => handleHover(),
+                          onDrop: (ev) =>
+                              handleDrop(ev, dropController, gs, setState),
+                          onLeave: () => handleLeaveHover(),
                         ),
-                        Center(child: Text('Drop files here')),
+                        dropZoneState == ''
+                            ? Center(
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                    Icon(
+                                      FluentIcons.upload,
+                                      size: 80,
+                                      color: Color.fromARGB(255, 60, 60, 61),
+                                    ),
+                                    Text(
+                                      'Drop Files Here',
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                  ]))
+                            : Center(
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                    Icon(
+                                      FluentIcons.add_field,
+                                      size: 80,
+                                      color: Color.fromARGB(255, 60, 60, 61),
+                                    ),
+                                    Text(
+                                      ' ',
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                  ]))
                       ],
                     )),
                 TextBox(
@@ -166,18 +237,19 @@ class UploadFieldState extends State<UploadField> {
         SizedBoxGrid(Text(
           widget.humanName,
         )),
+        SizedBoxGrid(Text("(" + widget.filetype + ")")),
         SizedBoxGrid(
           Container(
             //show file name here
-            child: selectedfile == null
+            child: gs.listFileNames[widget.filetype] == null
                 ? Text("Choose File")
-                : Text(selectedfile?.files.first.name ?? ''),
+                : Text(gs.listFileNames[widget.filetype] ?? ''),
           ),
         ),
         SizedBoxGrid(
           Container(
               child: Button(
-            child: selectedfile == null
+            child: gs.listFileNames[widget.filetype] == null
                 ? Text("CHOOSE FILE")
                 : Text("REPLACE FILE"),
             onPressed: () {
@@ -186,14 +258,18 @@ class UploadFieldState extends State<UploadField> {
           )),
         ),
         SizedBoxGrid(
-          selectedfile == null
+          gs.listFileNames[widget.filetype] == null
               ? Container()
               : Container(
                   child: Button(
                   child: Text("UPLOAD"),
                   onPressed: () {
-                    uploadDataFile(gs, selectedfilebytes, selectedfilename,
-                        widget.filetype, setState);
+                    uploadDataFile(
+                        gs,
+                        gs.listFiles[widget.filetype],
+                        gs.listFileNames[widget.filetype],
+                        widget.filetype,
+                        setState);
                   },
                 )),
         ),
@@ -212,12 +288,4 @@ class UploadFieldState extends State<UploadField> {
       ],
     );
   }
-}
-
-void handleDrop(ev, controller, gs) async {
-  print('Zone 1 drop: ${ev.name}');
-  final bytes = await controller.getFileData(ev);
-  String name = await controller.getFilename(ev);
-  gs.saveFile(name, bytes, name);
-  print(gs.listFileNames);
 }

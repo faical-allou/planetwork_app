@@ -11,25 +11,6 @@ class SizedBoxGrid extends StatelessWidget {
   }
 }
 
-class Waiting extends StatelessWidget {
-  final String status;
-  Waiting(this.status);
-
-  @override
-  Widget build(BuildContext context) {
-    switch (status) {
-      case 'Not Run Yet':
-        return Container();
-      case 'Finished':
-        return Icon(FluentIcons.check_mark);
-      case 'Waiting':
-        return ProgressRing();
-      default:
-        return Container();
-    }
-  }
-}
-
 class ResultElement extends StatelessWidget {
   final String name;
   ResultElement(this.name);

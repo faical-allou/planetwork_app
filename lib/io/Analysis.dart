@@ -7,13 +7,12 @@ late Response response;
 late String progress = '0';
 Dio dio = new Dio();
 
-void uploadDataFile(
-    gs, selectedfilebytes, selectedfilename, filetype, setState) async {
+Future uploadDataFile(gs, filetype, setState) async {
   String uploadurl = "http://localhost:8080/upload/" + filetype;
 
   FormData formdata = FormData.fromMap({
-    filetype: await MultipartFile.fromBytes(selectedfilebytes ?? [0],
-        filename: selectedfilename ?? ''),
+    filetype: await MultipartFile.fromBytes(gs.listFiles[filetype] ?? [0],
+        filename: gs.listFileNames[filetype] ?? ''),
     "analysisName": gs.analysisName,
   });
   response = await dio.post(

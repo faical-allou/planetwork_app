@@ -25,24 +25,6 @@ class InputScreenState extends State<InputScreen> {
   String status = 'Not Run Yet';
   String dropZoneState = '';
 
-  stopWaiting() {
-    setState(() {
-      status = 'Finished';
-    });
-  }
-
-  wait() {
-    setState(() {
-      status = 'Waiting';
-    });
-  }
-
-  reset() {
-    setState(() {
-      status = 'Not Run Yet';
-    });
-  }
-
   handleHover() {
     setState(() {
       dropZoneState = 'Hovering';
@@ -53,6 +35,30 @@ class InputScreenState extends State<InputScreen> {
   handleLeaveHover() {
     setState(() {
       dropZoneState = '';
+    });
+  }
+
+  startUploading() {
+    setState(() {
+      status = 'Uploading';
+    });
+  }
+
+  stopWaiting() {
+    setState(() {
+      status = 'Done';
+    });
+  }
+
+  startWaiting() {
+    setState(() {
+      status = 'Waiting';
+    });
+  }
+
+  reset() {
+    setState(() {
+      status = "Not Run Yet";
     });
   }
 
@@ -69,9 +75,6 @@ class InputScreenState extends State<InputScreen> {
   String detectFileType(htmlFile, controller, name) {
     RegExp splitter = new RegExp('[.-]', caseSensitive: false);
     var listSplit = name.split(splitter);
-    Map<String, String> fullList = listInput;
-    fullList.addAll(listParam);
-    fullList.addAll(listData);
 
     for (var i = 0; i < listSplit.length; i++) {
       print("Listsplit==  " + listSplit[i]);
@@ -126,7 +129,7 @@ class InputScreenState extends State<InputScreen> {
                                     children: [
                                     Icon(
                                       FluentIcons.upload,
-                                      size: 80,
+                                      size: 60,
                                       color: Color.fromARGB(255, 60, 60, 61),
                                     ),
                                     Text(
@@ -157,30 +160,21 @@ class InputScreenState extends State<InputScreen> {
                     reset();
                   },
                   header: 'Name your Analysis here',
-                  //placeholder: status.analysisName,
                 ),
-                for (var k in listInput.keys)
+                for (var k in fullList.keys)
                   UploadField(
                     filetype: k,
                     humanName: listInput[k] ?? '',
                   ),
-                for (var k in listParam.keys)
-                  UploadField(
-                    filetype: k,
-                    humanName: listParam[k] ?? '',
-                  ),
-                for (var k in listData.keys)
-                  UploadField(
-                    filetype: k,
-                    humanName: listData[k] ?? '',
-                  ),
                 Button(
-                    child: Text('run'),
-                    onPressed: () {
-                      setState(() {
-                        status = 'Waiting';
-                      });
-                      launchSim(gs.analysisName, stopWaiting);
+                    child: WaitingButtonText(status),
+                    onPressed: () async {
+                      startUploading();
+                      for (var k in fullList.keys) {
+                        await uploadDataFile(gs, k, setState);
+                      }
+                      startWaiting();
+                      await launchSim(gs.analysisName, stopWaiting);
                     }),
                 Center(
                   child: Padding(
@@ -257,35 +251,49 @@ class UploadFieldState extends State<UploadField> {
             },
           )),
         ),
-        SizedBoxGrid(
-          gs.listFileNames[widget.filetype] == null
-              ? Container()
-              : Container(
-                  child: Button(
-                  child: Text("UPLOAD"),
-                  onPressed: () {
-                    uploadDataFile(
-                        gs,
-                        gs.listFiles[widget.filetype],
-                        gs.listFileNames[widget.filetype],
-                        widget.filetype,
-                        setState);
-                  },
-                )),
-        ),
-        SizedBoxGrid(
-          Container(
-            margin: EdgeInsets.all(10),
-            //show file name here
-            child: progress == '0'
-                ? Text("")
-                : Text(
-                    Path.basename("Progress: $progress"),
-                  ),
-            //show progress status here
-          ),
-        ),
       ],
     );
+  }
+}
+
+class Waiting extends StatelessWidget {
+  final String status;
+  Waiting(this.status);
+
+  @override
+  Widget build(BuildContext context) {
+    switch (status) {
+      case 'Not Run Yet':
+        return Container();
+      case 'Done':
+        return Icon(FluentIcons.check_mark);
+      case 'Waiting':
+        return ProgressRing();
+      case 'Uploading':
+        return ProgressBar();
+      default:
+        return Container();
+    }
+  }
+}
+
+class WaitingButtonText extends StatelessWidget {
+  final String status;
+  WaitingButtonText(this.status);
+
+  @override
+  Widget build(BuildContext context) {
+    switch (status) {
+      case 'Not Run Yet':
+        return Text("Upload all files and Run");
+      case 'Done':
+        return Text("Results available in the Output Page - Click to rerun");
+      case 'Waiting':
+        return Text("Running Simulation ...");
+      case 'Uploading':
+        return Text("Uploading ... ");
+      default:
+        return Text("Upload all files and Run");
+    }
   }
 }

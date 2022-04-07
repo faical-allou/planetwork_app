@@ -16,3 +16,7 @@ Map<String, String> listParam = {
   'connections': 'Connection Parameters',
   'preferences': 'Market Preferences',
 };
+
+Map<String, String> fullList = listInput
+  ..addAll(listParam)
+  ..addAll(listData);

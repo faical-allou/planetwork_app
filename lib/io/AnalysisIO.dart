@@ -1,14 +1,17 @@
-import 'package:dio/dio.dart';
-import 'dart:html' as html;
-import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode;
+import 'dart:html' as html;
+
+import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:planetwork_app/GlobalConfig.dart';
 
 late Response response;
 late String progress = '0';
 Dio dio = new Dio();
 
-Future uploadDataFile(gs, filetype, setState) async {
-  String uploadurl = "http://localhost:8080/upload/" + filetype;
+Future uploadDataFile(gs, filetype) async {
+  String uploadurl = serverURL + "upload/" + filetype;
 
   FormData formdata = FormData.fromMap({
     filetype: await MultipartFile.fromBytes(gs.listFiles[filetype] ?? [0],
@@ -20,10 +23,6 @@ Future uploadDataFile(gs, filetype, setState) async {
     data: formdata,
     onSendProgress: (int sent, int total) {
       String percentage = (sent / total * 100).toStringAsFixed(2);
-      setState(() {
-        progress = percentage + "%";
-        //update the progress
-      });
     },
   );
 
@@ -36,7 +35,7 @@ Future uploadDataFile(gs, filetype, setState) async {
 }
 
 Future<String> launchSim(analysisName, runWhenDone) async {
-  String runURL = "http://localhost:8080/run/" + analysisName;
+  String runURL = serverURL + "run/" + analysisName;
   response = await dio.get(runURL);
   if (response.statusCode == 200) {
     runWhenDone();
@@ -52,8 +51,23 @@ void downloadFile(String url) {
   anchorElement.click();
 }
 
+void downloadTemplateFile(String filetype) {
+  String url = serverURL + "download_template/" + filetype;
+  downloadFile(url);
+}
+
+void downloadRPFile(String name) {
+  String url = serverURL + "download_rp/" + name;
+  downloadFile(url);
+}
+
+void downloadZIPResult(String name) {
+  String url = serverURL + "download_resultzip/" + name;
+  downloadFile(url);
+}
+
 Future<List<String>> fetchListResults() async {
-  String url = "http://localhost:8080/resultlist/";
+  String url = serverURL + "resultlist/";
   final response = await http.get(Uri.parse(url));
 
   if (response.statusCode == 200) {
@@ -64,5 +78,16 @@ Future<List<String>> fetchListResults() async {
     return listResults;
   } else {
     throw Exception('Failed to load chef');
+  }
+}
+
+Future<String> clearResults(analysisName) async {
+  String runURL = serverURL + "clear_result/" + analysisName;
+  response = await dio.get(runURL);
+  if (response.statusCode == 200) {
+    //runWhenDone();
+    return response.toString();
+  } else {
+    throw Exception('Failed to launch Sim');
   }
 }

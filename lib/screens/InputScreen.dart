@@ -1,17 +1,15 @@
-//import 'package:flutter/material.dart';
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/services.dart';
-import 'package:planetwork_app/io/Analysis.dart';
-import 'package:provider/provider.dart';
-import 'package:planetwork_app/main.dart';
-import 'package:planetwork_app/models/ModelData.dart';
-import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'dart:typed_data';
 import 'dart:core';
 
-import 'package:planetwork_app/screens/Templates.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
+import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path/path.dart' as Path;
+
+import 'package:planetwork_app/io/AnalysisIO.dart';
+import 'package:planetwork_app/main.dart';
+import 'package:planetwork_app/models/ModelData.dart';
+import 'package:planetwork_app/screens/Templates.dart';
 
 class InputScreen extends StatefulWidget {
   @override
@@ -24,6 +22,7 @@ class InputScreenState extends State<InputScreen> {
   final myController = TextEditingController();
   String status = 'Not Run Yet';
   String dropZoneState = '';
+  String progress = "0%";
 
   handleHover() {
     setState(() {
@@ -62,14 +61,16 @@ class InputScreenState extends State<InputScreen> {
     });
   }
 
-  void handleDrop(htmlFile, controller, gs, setState) async {
+  refresh() {
+    setState(() {});
+  }
+
+  void handleDrop(htmlFile, controller, gs, handleLeaveHover) async {
     final bytes = await controller.getFileData(htmlFile);
     String name = await controller.getFilename(htmlFile);
     String type = detectFileType(htmlFile, controller, name);
     gs.saveFile(type, bytes, name);
-    setState(() {
-      dropZoneState = '';
-    }); //update the UI so that file name is shown;
+    handleLeaveHover(); //update the UI so that file name is shown;
   }
 
   String detectFileType(htmlFile, controller, name) {
@@ -101,14 +102,13 @@ class InputScreenState extends State<InputScreen> {
     late DropzoneViewController dropController;
 
     return ScaffoldPage(
-        header: Text("Select File and Upload"),
         content: Container(
             alignment: Alignment.center,
             padding: EdgeInsets.all(40),
             child: ListView(
               children: [
                 SizedBox(
-                    height: 150,
+                    height: 80,
                     width: 600,
                     child: Stack(
                       children: [
@@ -118,8 +118,8 @@ class InputScreenState extends State<InputScreen> {
                           onCreated: (ctrl) => dropController = ctrl,
                           onError: (String? ev) => print('Error: $ev'),
                           onHover: () => handleHover(),
-                          onDrop: (ev) =>
-                              handleDrop(ev, dropController, gs, setState),
+                          onDrop: (ev) => handleDrop(
+                              ev, dropController, gs, handleLeaveHover),
                           onLeave: () => handleLeaveHover(),
                         ),
                         dropZoneState == ''
@@ -129,27 +129,31 @@ class InputScreenState extends State<InputScreen> {
                                     children: [
                                     Icon(
                                       FluentIcons.upload,
-                                      size: 60,
+                                      size: 40,
                                       color: Color.fromARGB(255, 60, 60, 61),
                                     ),
-                                    Text(
-                                      'Drop Files Here',
-                                      style: TextStyle(fontSize: 24),
-                                    ),
+                                    Padding(
+                                        padding: EdgeInsets.all(10),
+                                        child: Text(
+                                          'Drop files here to upload',
+                                          style: TextStyle(fontSize: 14),
+                                        )),
                                   ]))
                             : Center(
                                 child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                     Icon(
-                                      FluentIcons.add_field,
-                                      size: 80,
+                                      FluentIcons.add,
+                                      size: 40,
                                       color: Color.fromARGB(255, 60, 60, 61),
                                     ),
-                                    Text(
-                                      ' ',
-                                      style: TextStyle(fontSize: 24),
-                                    ),
+                                    Padding(
+                                        padding: EdgeInsets.all(10),
+                                        child: Text(
+                                          "yes, here, we'll assign them",
+                                          style: TextStyle(fontSize: 14),
+                                        )),
                                   ]))
                       ],
                     )),
@@ -171,7 +175,7 @@ class InputScreenState extends State<InputScreen> {
                     onPressed: () async {
                       startUploading();
                       for (var k in fullList.keys) {
-                        await uploadDataFile(gs, k, setState);
+                        await uploadDataFile(gs, k);
                       }
                       startWaiting();
                       await launchSim(gs.analysisName, stopWaiting);
@@ -228,6 +232,20 @@ class UploadFieldState extends State<UploadField> {
     return Wrap(
       alignment: WrapAlignment.spaceAround,
       children: [
+        SizedBoxGrid(
+          Container(
+              child: Button(
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Icon(FluentIcons.download_document),
+                  Text("template"),
+                ]),
+            onPressed: () {
+              downloadTemplateFile(widget.filetype);
+            },
+          )),
+        ),
         SizedBoxGrid(Text(
           widget.humanName,
         )),
@@ -236,7 +254,7 @@ class UploadFieldState extends State<UploadField> {
           Container(
             //show file name here
             child: gs.listFileNames[widget.filetype] == null
-                ? Text("Choose File")
+                ? Text("--")
                 : Text(gs.listFileNames[widget.filetype] ?? ''),
           ),
         ),

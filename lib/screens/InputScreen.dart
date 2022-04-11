@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:core';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
@@ -108,7 +109,7 @@ class InputScreenState extends State<InputScreen> {
             child: ListView(
               children: [
                 SizedBox(
-                    height: 80,
+                    height: 120,
                     width: 600,
                     child: Stack(
                       children: [
@@ -140,21 +141,28 @@ class InputScreenState extends State<InputScreen> {
                                         )),
                                   ]))
                             : Center(
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                    Icon(
-                                      FluentIcons.add,
-                                      size: 40,
-                                      color: Color.fromARGB(255, 60, 60, 61),
-                                    ),
-                                    Padding(
-                                        padding: EdgeInsets.all(10),
-                                        child: Text(
-                                          "yes, here, we'll assign them",
-                                          style: TextStyle(fontSize: 14),
-                                        )),
-                                  ]))
+                                child: DottedBorder(
+                                    color: Color.fromARGB(255, 119, 119, 119),
+                                    padding: EdgeInsets.only(
+                                        top: 24.0, left: 100, right: 100),
+                                    strokeWidth: 2,
+                                    child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            FluentIcons.add,
+                                            size: 40,
+                                            color:
+                                                Color.fromARGB(255, 60, 60, 61),
+                                          ),
+                                          Padding(
+                                              padding: EdgeInsets.all(10),
+                                              child: Text(
+                                                "yes, here, we'll assign them",
+                                                style: TextStyle(fontSize: 14),
+                                              )),
+                                        ])))
                       ],
                     )),
                 TextBox(

@@ -44,6 +44,14 @@ class InputScreenState extends State<InputScreen> {
     });
   }
 
+  getReady(readinessFromGS) {
+    if (readinessFromGS) {
+      setState(() {
+        status = 'Files Ready';
+      });
+    }
+  }
+
   stopWaiting() {
     setState(() {
       status = 'Done';
@@ -71,7 +79,8 @@ class InputScreenState extends State<InputScreen> {
     String name = await controller.getFilename(htmlFile);
     String type = detectFileType(htmlFile, controller, name);
     gs.saveFile(type, bytes, name);
-    handleLeaveHover(); //update the UI so that file name is shown;
+    getReady(gs.isReady);
+    handleLeaveHover();
   }
 
   String detectFileType(htmlFile, controller, name) {
@@ -79,9 +88,7 @@ class InputScreenState extends State<InputScreen> {
     var listSplit = name.split(splitter);
 
     for (var i = 0; i < listSplit.length; i++) {
-      print("Listsplit==  " + listSplit[i]);
       for (var k in fullList.keys) {
-        print("k==  " + k);
         if (k == listSplit[i]) {
           return k;
         }
@@ -95,6 +102,7 @@ class InputScreenState extends State<InputScreen> {
     super.initState();
     GlobalState gs = Provider.of<GlobalState>(context, listen: false);
     myController.text = gs.analysisName;
+    getReady(gs.isReady);
   }
 
   @override
@@ -173,21 +181,44 @@ class InputScreenState extends State<InputScreen> {
                   },
                   header: 'Name your Analysis here',
                 ),
+                Wrap(alignment: WrapAlignment.spaceAround, children: [
+                  SizedBoxGrid(Text(
+                    'Template',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                  SizedBoxGrid(Text(
+                    'File content',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                  SizedBoxGrid(Text(
+                    'File type',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                  SizedBoxGrid(Text(
+                    'File name',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                  SizedBoxGrid(Text(' ')),
+                ]),
                 for (var k in fullList.keys)
                   UploadField(
                     filetype: k,
                     humanName: listInput[k] ?? '',
                   ),
-                Button(
-                    child: WaitingButtonText(status),
-                    onPressed: () async {
-                      startUploading();
-                      for (var k in fullList.keys) {
-                        await uploadDataFile(gs, k);
-                      }
-                      startWaiting();
-                      await launchSim(gs.analysisName, stopWaiting);
-                    }),
+                SizedBoxGrid(
+                  gs.isReady
+                      ? FilledButton(
+                          child: WaitingButtonText(status),
+                          onPressed: () async {
+                            startUploading();
+                            for (var k in fullList.keys) {
+                              await uploadDataFile(gs, k);
+                            }
+                            startWaiting();
+                            await launchSim(gs.analysisName, stopWaiting);
+                          })
+                      : Container(),
+                ),
                 Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
@@ -242,13 +273,8 @@ class UploadFieldState extends State<UploadField> {
       children: [
         SizedBoxGrid(
           Container(
-              child: Button(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Icon(FluentIcons.download_document),
-                  Text("template"),
-                ]),
+              child: IconButton(
+            icon: Icon(FluentIcons.download_document),
             onPressed: () {
               downloadTemplateFile(widget.filetype);
             },
@@ -268,14 +294,19 @@ class UploadFieldState extends State<UploadField> {
         ),
         SizedBoxGrid(
           Container(
-              child: Button(
-            child: gs.listFileNames[widget.filetype] == null
-                ? Text("CHOOSE FILE")
-                : Text("REPLACE FILE"),
-            onPressed: () {
-              selectFile(gs);
-            },
-          )),
+              child: gs.listFileNames[widget.filetype] == null
+                  ? Button(
+                      child: Text("CHOOSE FILE"),
+                      onPressed: () {
+                        selectFile(gs);
+                      },
+                    )
+                  : FilledButton(
+                      child: Text("REPLACE FILE"),
+                      onPressed: () {
+                        selectFile(gs);
+                      },
+                    )),
         ),
       ],
     );
@@ -311,7 +342,9 @@ class WaitingButtonText extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (status) {
       case 'Not Run Yet':
-        return Text("Upload all files and Run");
+        return Text("Select all files");
+      case 'Files Ready':
+        return Text("Upload and Run");
       case 'Done':
         return Text("Results available in the Output Page - Click to rerun");
       case 'Waiting':

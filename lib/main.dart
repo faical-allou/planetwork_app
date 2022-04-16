@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:planetwork_app/models/ModelData.dart';
 import 'package:provider/provider.dart';
 
 import 'package:planetwork_app/screens/InputScreen.dart';
@@ -63,12 +64,19 @@ class MyAppState extends State<MyApp> {
 class GlobalState with ChangeNotifier {
   bool isLoggedIn = false;
   String analysisName = '';
+  bool isReady = false;
   Map<String, Uint8List?> listFiles = {};
   Map<String, String?> listFileNames = {};
+
+  void checkIfReady() {
+    isReady = listFiles.length == fullList.length;
+    notifyListeners();
+  }
 
   void saveFile(String key, Uint8List? file, String? name) {
     listFiles[key] = file;
     listFileNames[key] = name;
+    checkIfReady();
     notifyListeners();
   }
 

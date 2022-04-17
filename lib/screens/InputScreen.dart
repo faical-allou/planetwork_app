@@ -98,23 +98,23 @@ class InputScreenState extends State<InputScreen> {
     return 'type not found';
   }
 
-  Future<void> showAlert() async {
+  Future<void> showAlert(titleText, contentText, actionText) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return ContentDialog(
-          title: const Text('Incomplete Input'),
+          title: Text(titleText),
           content: SingleChildScrollView(
             child: ListBody(
-              children: const <Widget>[
-                Text('Add a name to your analysis'),
+              children: <Widget>[
+                Text(contentText),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Add a name'),
+              child: Text(actionText),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -257,10 +257,15 @@ class InputScreenState extends State<InputScreen> {
                                     gs.analysisName, stopWaiting, reset);
                                 print(res2);
                               } else {
+                                showAlert(
+                                    'Problem while uploading',
+                                    'Your files could not be uploaded',
+                                    'Check files and try again');
                                 reset();
                               }
                             } else {
-                              showAlert();
+                              showAlert('Missing Analysis Name',
+                                  'Your analysis needs a name', 'Add name');
                             }
                           })
                       : Container(),

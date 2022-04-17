@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'dart:core';
 
+import 'package:flutter/services.dart';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_dropzone/flutter_dropzone.dart';
@@ -28,7 +30,6 @@ class InputScreenState extends State<InputScreen> {
   handleHover() {
     setState(() {
       dropZoneState = 'Hovering';
-      print(dropZoneState);
     });
   }
 
@@ -95,6 +96,33 @@ class InputScreenState extends State<InputScreen> {
       }
     }
     return 'type not found';
+  }
+
+  Future<void> showAlert() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return ContentDialog(
+          title: const Text('Incomplete Input'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('Add a name to your analysis'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Add a name'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -179,7 +207,11 @@ class InputScreenState extends State<InputScreen> {
                     gs.setAnalysisName(text);
                     reset();
                   },
-                  header: 'Name your Analysis here',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp('[ 0-9a-zA-Z_-]')),
+                  ],
+                  header:
+                      'Name your Analysis here (only letters, numbers and " ","-","_" )',
                 ),
                 Wrap(alignment: WrapAlignment.spaceAround, children: [
                   SizedBoxGrid(Text(
@@ -210,12 +242,26 @@ class InputScreenState extends State<InputScreen> {
                       ? FilledButton(
                           child: WaitingButtonText(status),
                           onPressed: () async {
-                            startUploading();
-                            for (var k in fullList.keys) {
-                              await uploadDataFile(gs, k);
+                            int counter = 0;
+                            if (gs.analysisName.length > 0) {
+                              startUploading();
+                              for (var k in fullList.keys) {
+                                String res = await uploadDataFile(gs, k);
+                                if (res == 'done') {
+                                  counter += 1;
+                                }
+                              }
+                              if (counter == fullList.length) {
+                                startWaiting();
+                                String res2 = await launchSim(
+                                    gs.analysisName, stopWaiting, reset);
+                                print(res2);
+                              } else {
+                                reset();
+                              }
+                            } else {
+                              showAlert();
                             }
-                            startWaiting();
-                            await launchSim(gs.analysisName, stopWaiting);
                           })
                       : Container(),
                 ),

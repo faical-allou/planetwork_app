@@ -167,7 +167,7 @@ class InputScreenState extends State<InputScreen> {
                                     Icon(
                                       FluentIcons.upload,
                                       size: 40,
-                                      color: Color.fromARGB(255, 60, 60, 61),
+                                      color: customGrey,
                                     ),
                                     Padding(
                                         padding: EdgeInsets.all(10),
@@ -178,20 +178,17 @@ class InputScreenState extends State<InputScreen> {
                                   ]))
                             : Center(
                                 child: DottedBorder(
-                                    color: Color.fromARGB(255, 119, 119, 119),
+                                    color: customGrey,
                                     padding: EdgeInsets.only(
-                                        top: 24.0, left: 100, right: 100),
+                                        top: 24.0, left: 200, right: 200),
+                                    dashPattern: [2, 1],
                                     strokeWidth: 2,
                                     child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Icon(
-                                            FluentIcons.add,
-                                            size: 40,
-                                            color:
-                                                Color.fromARGB(255, 60, 60, 61),
-                                          ),
+                                          Icon(FluentIcons.add,
+                                              size: 40, color: customGrey),
                                           Padding(
                                               padding: EdgeInsets.all(10),
                                               child: Text(
@@ -201,6 +198,7 @@ class InputScreenState extends State<InputScreen> {
                                         ])))
                       ],
                     )),
+                Container(height: 30),
                 TextBox(
                   controller: myController,
                   onChanged: (text) {
@@ -270,6 +268,9 @@ class InputScreenState extends State<InputScreen> {
                           })
                       : Container(),
                 ),
+                status == 'Done'
+                    ? ResultElement(gs.analysisName, refresh)
+                    : Container(),
                 Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
@@ -325,7 +326,7 @@ class UploadFieldState extends State<UploadField> {
         SizedBoxGrid(
           Container(
               child: IconButton(
-            icon: Icon(FluentIcons.download_document),
+            icon: Icon(FluentIcons.download),
             onPressed: () {
               downloadTemplateFile(widget.filetype);
             },
